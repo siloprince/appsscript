@@ -22,15 +22,50 @@
   <script type="text/javascript">
     var config = {
       max: 25,
-      xrange: document.querySelector("input#xrange"),
-      yrange: document.querySelector("input#yrange"),
-      xval: document.querySelector("input#xval"),
-      yval: document.querySelector("input#yval")
+      range: {
+        x: document.querySelector("input#xrange"),
+        y: document.querySelector("input#yrange"),
+      },
+      val: {
+        x: document.querySelector("input#xval"),
+        y: document.querySelector("input#yval")
+      },
+      margin: {
+        x: 10,
+        y: 10
+      }
     };
-    setup(config.xrange,config.yrange,config.xval,config.yval);
-    setup(config.yrange,config.xrange,config.yval,config.xval);
+    setup(config.range, config.val, true);
+    setup(config.range, config.val, false);
 
-    function setup(wrange, zrange, wval, zval) {
+    function drawGraph(xval, yval) {
+      /*
+      var svg = ['<svg>'];
+      for(var x=0;x<xval;x++){
+        for(var y=0;y<yval;y++)
+          var cx = config.xx;
+          var cy = y;
+          svg.push('<circle cx="'+cx+'" cy="'+cy+'" r="3"/>');
+        }
+      }
+      svg.push('</svg>>);
+      document.currentScript.insertAdjacentHTML('afterend', svg.join(''));
+      */
+    }
+
+    function setup(range, val, wzflip) {
+      var wrange, zrange, wval, zval;
+      if (!wzflip) {
+        wrange = range.x;
+        zrange = range.y;
+        wval = val.x;
+        zval = val.y;
+      } else {
+        wrange = range.y;
+        zrange = range.x;
+        wval = val.y;
+        zval = val.x;
+      }
       wrange.setAttribute('max', config.max);
       wval.setAttribute('value', wrange.getAttribute('value'));
       wrange.addEventListener(
@@ -57,6 +92,11 @@
           }
           wval.setAttribute('value', wvalue);
           zval.setAttribute('value', zvalue);
+          if (!wzflip) {
+            drawGraph(wvalue, zvalue);
+          } else {
+            drawGraph(zvalue, wvalue);
+          }
         }, false
       );
     }
@@ -64,17 +104,19 @@
       'change',
       function (ev) {
         var value = ev.target.value;
-        var yrange = document.querySelector("input#yrange");
+        var yrange = config.range.y;
+        var yval = config.val.y;
         if (value === 'line') {
           yrange.setAttribute('value', 1);
+          yval.setAttribute('value', 1)
           yrange.setAttribute('disabled', 'disabled');
         } else {
           yrange.removeAttribute('disabled');
           yrange.setAttribute('value', 2);
+          yval.setAttribute('value', 2)
         }
       }, false
     );
-    document.currentScript.insertAdjacentHTML('afterend', '<div>xxx</div>');
   </script>
 </body>
 
