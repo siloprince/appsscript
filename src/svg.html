@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <base target="_top">
+</head>
+
+<body>
+  種別:
+  <select id="type" name="type" style="font-size:11pt;">
+      <option value="line">線分</option>
+      <option value="lattice_sq">正方格子</option>
+      <option value="lattice_tr">三角形格子</option>
+      <option value="lattice_hx">六角形格子</option>
+    </select> x: <input size="2" id="xval" readonly="readonly" style="border:none;font-size:11pt;">
+  <input type="range" name="xrange" id="xrange" value="2" min="1" max="25"> y: <input size="2" id="yval" readonly="readonly"
+    style="border:none;font-size:11pt;">
+  <input type="range" name="yrange" id="yrange" value="1" min="1" max="10" disabled="disabled">
+  <input type="checkbox" name="boundary">境界有り
+
+  <script type="text/javascript">
+    var config = {
+      max: 25,
+      xrange: document.querySelector("input#xrange"),
+      yrange: document.querySelector("input#yrange"),
+      xval: document.querySelector("input#xval"),
+      yval: document.querySelector("input#yval")
+    };
+    setup(config.xrange,config.yrange,config.xval,config.yval);
+    setup(config.yrange,config.xrange,config.yval,config.xval);
+
+    function setup(wrange, zrange, wval, zval) {
+      wrange.setAttribute('max', config.max);
+      wval.setAttribute('value', wrange.getAttribute('value'));
+      wrange.addEventListener(
+        'change',
+        function (ev) {
+          var wvalue = parseInt(ev.target.value, 10);
+          var zvalue = parseInt(zrange.getAttribute('value'), 10);
+          var wzvalue = wvalue * zvalue;
+          if (wzvalue > config.max) {
+            for (var w = wvalue - 1; w >= 2; w--) {
+              for (var z = zvalue; z >= 2; z--) {
+                var _wzvalue = w * z;
+                if (_wzvalue <= config.max) {
+                  wrange.getAttribute('value', w);
+                  zrange.getAttribute('value', z);
+                  wval.setAttribute('value', w);
+                  zval.setAttribute('value', z);
+                  return;
+                }
+              }
+            }
+            zvalue = 2;
+            wvalue = Math.floor(config.max / zvalue);
+          }
+          wval.setAttribute('value', wvalue);
+          zval.setAttribute('value', zvalue);
+        }, false
+      );
+    }
+    document.querySelector("select#type").addEventListener(
+      'change',
+      function (ev) {
+        var value = ev.target.value;
+        var yrange = document.querySelector("input#yrange");
+        if (value === 'line') {
+          yrange.setAttribute('value', 1);
+          yrange.setAttribute('disabled', 'disabled');
+        } else {
+          yrange.removeAttribute('disabled');
+          yrange.setAttribute('value', 2);
+        }
+      }, false
+    );
+    document.currentScript.insertAdjacentHTML('afterend', '<div>xxx</div>');
+  </script>
+</body>
+
+</html>
