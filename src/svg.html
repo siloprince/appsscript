@@ -11,8 +11,10 @@
   <select id="type" name="type" style="font-size:11pt;">
       <option value="line">線分</option>
       <option value="lattice_sq">正方格子</option>
+      <!--
       <option value="lattice_tr">三角形格子</option>
       <option value="lattice_hx">六角形格子</option>
+      -->
     </select> x: <input size="2" id="xinput" readonly="readonly" style="border:none;font-size:11pt;">
   <input type="range" name="xrange" id="xrange" value="2" min="2" max="25"> y: <input size="2" id="yinput" readonly="readonly"
     style="border:none;font-size:11pt;">
@@ -39,8 +41,8 @@
           y: 50
         },
         scale: {
-          x: 20,
-          y: 20
+          x: 40,
+          y: 40
         }
       };
       setup(config.range, config.input, true);
@@ -53,11 +55,23 @@
         var xval = config.input.x.value;
         var yval = config.input.y.value;
         var svg = [];
+        var type = config.type.value;
+        var heightRatio = 1;
         for (var x = 0; x < xval; x++) {
           for (var y = 0; y < yval; y++) {
-            var cx = x * config.scale.x + config.margin.x;
-            var cy = y * config.scale.y + config.margin.y;
-            svg.push('<circle cx="' + cx + '" cy="' + cy + '" r="3"/>');
+            var cxa = x * config.scale.x + config.margin.x;
+            var cya = y * config.scale.y + config.margin.y;
+            var cxb = (x+1) * config.scale.x + config.margin.x;
+            var cyb = (y+1) * config.scale.y + config.margin.y;
+            svg.push('<circle cx="' + cxa + '" cy="' + cya + '" r="5"/>');
+            if (y<yval-1 && type !=='line') {
+              console.log(11);
+              svg.push('<line x1="'+cxa+'" y1="'+cya+'" x2="'+cxa+'" y2="'+cyb+'" style="stroke:#000000;"/>');
+            }
+            if (x<xval-1 ) {
+              console.log(22);
+              svg.push('<line x1="'+cxa+'" y1="'+cya+'" x2="'+cxb+'" y2="'+cya+'" style="stroke:#000000;"/>');
+            }
           }
         }
         config.svg.innerHTML = svg.join('');
@@ -156,8 +170,8 @@
             } else {
               yrange.removeAttribute('disabled');
               xrange.setAttribute('min', 2);
-              yrange.setAttribute('min', 2);
-              if (yrange.value===1) {
+              if (yrange.value == 1) {
+                yrange.setAttribute('min', 2);
                 yrange.stepDown(config.max);
                 yrange.stepUp(2);
                 yrange.value = 2;
