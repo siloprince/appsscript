@@ -8,3 +8,16 @@ function figure() {
     .setHeight(400);
   SpreadsheetApp.getUi().showModalDialog(htmlOutput, 'test');
 }
+
+function onEdit(ev) {
+  var range = ev.range;
+  var width = range.getWidth();
+  var height = range.getHeight();
+  if (width!==1 || height!==1) {
+    return;
+  }
+  var formula = range.getFormula();
+  if (formula==='=graph') {
+    figure();
+  }
+}

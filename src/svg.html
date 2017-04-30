@@ -13,110 +13,165 @@
       <option value="lattice_sq">正方格子</option>
       <option value="lattice_tr">三角形格子</option>
       <option value="lattice_hx">六角形格子</option>
-    </select> x: <input size="2" id="xval" readonly="readonly" style="border:none;font-size:11pt;">
-  <input type="range" name="xrange" id="xrange" value="2" min="1" max="25"> y: <input size="2" id="yval" readonly="readonly"
+    </select> x: <input size="2" id="xinput" readonly="readonly" style="border:none;font-size:11pt;">
+  <input type="range" name="xrange" id="xrange" value="2" min="2" max="25"> y: <input size="2" id="yinput" readonly="readonly"
     style="border:none;font-size:11pt;">
-  <input type="range" name="yrange" id="yrange" value="1" min="1" max="10" disabled="disabled">
+  <input type="range" name="yrange" id="yrange" value="1" min="1" max="25" disabled="disabled">
   <input type="checkbox" name="boundary">境界有り
-
+  <br/>
+  <svg id="svg" width="800" height="600"></svg>
   <script type="text/javascript">
-    var config = {
-      max: 25,
-      range: {
-        x: document.querySelector("input#xrange"),
-        y: document.querySelector("input#yrange"),
-      },
-      val: {
-        x: document.querySelector("input#xval"),
-        y: document.querySelector("input#yval")
-      },
-      margin: {
-        x: 10,
-        y: 10
-      }
-    };
-    setup(config.range, config.val, true);
-    setup(config.range, config.val, false);
-
-    function drawGraph(xval, yval) {
-      /*
-      var svg = ['<svg>'];
-      for(var x=0;x<xval;x++){
-        for(var y=0;y<yval;y++)
-          var cx = config.xx;
-          var cy = y;
-          svg.push('<circle cx="'+cx+'" cy="'+cy+'" r="3"/>');
+    (function () {
+      var config = {
+        max: 25,
+        svg: document.querySelector("svg#svg"),
+        type: document.querySelector("select#type"),
+        range: {
+          x: document.querySelector("input#xrange"),
+          y: document.querySelector("input#yrange"),
+        },
+        input: {
+          x: document.querySelector("input#xinput"),
+          y: document.querySelector("input#yinput")
+        },
+        margin: {
+          x: 50,
+          y: 50
+        },
+        scale: {
+          x: 20,
+          y: 20
         }
-      }
-      svg.push('</svg>>);
-      document.currentScript.insertAdjacentHTML('afterend', svg.join(''));
-      */
-    }
+      };
+      setup(config.range, config.input, true);
+      setup(config.range, config.input, false);
+      drawGraph();
+      addevent();
+      return;
 
-    function setup(range, val, wzflip) {
-      var wrange, zrange, wval, zval;
-      if (!wzflip) {
-        wrange = range.x;
-        zrange = range.y;
-        wval = val.x;
-        zval = val.y;
-      } else {
-        wrange = range.y;
-        zrange = range.x;
-        wval = val.y;
-        zval = val.x;
+      function drawGraph() {
+        var xval = config.input.x.value;
+        var yval = config.input.y.value;
+        var svg = [];
+        for (var x = 0; x < xval; x++) {
+          for (var y = 0; y < yval; y++) {
+            var cx = x * config.scale.x + config.margin.x;
+            var cy = y * config.scale.y + config.margin.y;
+            svg.push('<circle cx="' + cx + '" cy="' + cy + '" r="3"/>');
+          }
+        }
+        config.svg.innerHTML = svg.join('');
       }
-      wrange.setAttribute('max', config.max);
-      wval.setAttribute('value', wrange.getAttribute('value'));
-      wrange.addEventListener(
-        'change',
-        function (ev) {
-          var wvalue = parseInt(ev.target.value, 10);
-          var zvalue = parseInt(zrange.getAttribute('value'), 10);
-          var wzvalue = wvalue * zvalue;
-          if (wzvalue > config.max) {
-            for (var w = wvalue - 1; w >= 2; w--) {
+
+      function setup(range, input, uvflip) {
+        var urange, vrange, uinput, vinput;
+        if (!uvflip) {
+          urange = range.x;
+          vrange = range.y;
+          uinput = input.x;
+          vinput = input.y;
+        } else {
+          urange = range.y;
+          vrange = range.x;
+          uinput = input.y;
+          vinput = input.x;
+        }
+        urange.setAttribute('max', config.max);
+        uinput.setAttribute('value', urange.value);
+
+        urange.addEventListener(
+          'change',
+          function (ev) {
+            if (type.value === 'line') {
+              config.input.x.value = parseInt(ev.target.value, 10);
+              drawGraph();
+              return;
+            }
+            var wrange, zrange, winput, zinput, wvalue, zvalue;
+            var name = ev.target.name;
+            if (name === 'xrange') {
+              wvalue = parseInt(ev.target.value, 10);
+              wrange = config.range.x;
+              zrange = config.range.y;
+              winput = config.input.x;
+              zinput = config.input.y;
+            } else {
+              wvalue = parseInt(ev.target.value, 10);
+              wrange = config.range.y;
+              zrange = config.range.x;
+              winput = config.input.y;
+              zinput = config.input.x;
+            }
+            zvalue = parseInt(zrange.value, 10);
+
+            if (wvalue * zvalue > config.max) {
+              console.log(wvalue + ' ' + zvalue);
               for (var z = zvalue; z >= 2; z--) {
-                var _wzvalue = w * z;
-                if (_wzvalue <= config.max) {
-                  wrange.getAttribute('value', w);
-                  zrange.getAttribute('value', z);
-                  wval.setAttribute('value', w);
-                  zval.setAttribute('value', z);
+                if (wvalue * z <= config.max) {
+                  if (z < zvalue) {
+
+                    zrange.setAttribute('min',2);
+                    zrange.stepDown(config.max);
+                    zrange.stepUp(z);
+                    zrange.value = zvalue;
+                    zinput.value = z;
+                  }
+                  winput.value = wvalue;
+                  drawGraph();
                   return;
                 }
               }
+              zvalue = 2;
             }
-            zvalue = 2;
-            wvalue = Math.floor(config.max / zvalue);
-          }
-          wval.setAttribute('value', wvalue);
-          zval.setAttribute('value', zvalue);
-          if (!wzflip) {
-            drawGraph(wvalue, zvalue);
-          } else {
-            drawGraph(zvalue, wvalue);
-          }
-        }, false
-      );
-    }
-    document.querySelector("select#type").addEventListener(
-      'change',
-      function (ev) {
-        var value = ev.target.value;
-        var yrange = config.range.y;
-        var yval = config.val.y;
-        if (value === 'line') {
-          yrange.setAttribute('value', 1);
-          yval.setAttribute('value', 1)
-          yrange.setAttribute('disabled', 'disabled');
-        } else {
-          yrange.removeAttribute('disabled');
-          yrange.setAttribute('value', 2);
-          yval.setAttribute('value', 2)
-        }
-      }, false
-    );
+            
+            zrange.setAttribute('min',2);
+            zrange.stepDown(config.max);
+            zrange.stepUp(zvalue);
+            zrange.value = zvalue;
+            zinput.value = zvalue;
+            winput.value = wvalue;
+            drawGraph();
+          }, false
+        );
+      }
+      function addevent() {
+        config.type.addEventListener(
+          'change',
+          function (ev) {
+            var value = ev.target.value;
+            var xrange = config.range.x;
+            var yrange = config.range.y;
+            var xinput = config.input.x;
+            var yinput = config.input.y;
+            if (value === 'line') {
+              xrange.setAttribute('min', 2);
+              yrange.setAttribute('min', 1);
+              yrange.stepDown(config.max);
+              yrange.value = 1;
+              yinput.value = 1;
+              yrange.setAttribute('disabled', 'disabled');
+            } else {
+              yrange.removeAttribute('disabled');
+              xrange.setAttribute('min', 2);
+              yrange.setAttribute('min', 2);
+              yrange.stepDown(config.max);
+              console.log(yrange.value);
+              yrange.value = 2;
+              yinput.value = 2;
+              var xvalue = xinput.value;
+              if (xvalue * 2 > config.max) {
+                xvalue = Math.floor(config.max / 2);
+                xrange.stepDown(config.max);
+                xrange.stepDown(xvalue);
+                xrange.value = 1;
+                xinput.value = xvalue;
+              }
+            }
+            drawGraph();
+          }, false
+        );
+      }
+    })();
   </script>
 </body>
 
