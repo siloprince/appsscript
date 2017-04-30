@@ -105,26 +105,29 @@
             zvalue = parseInt(zrange.value, 10);
 
             if (wvalue * zvalue > config.max) {
-              console.log(wvalue + ' ' + zvalue);
-              for (var z = zvalue; z >= 2; z--) {
-                if (wvalue * z <= config.max) {
-                  if (z < zvalue) {
 
-                    zrange.setAttribute('min',2);
+              for (var w = wvalue; w >= 2; w--) {
+                for (var z = zvalue; z >= 2; z--) {
+                  if (w * z <= config.max) {
+                    zrange.setAttribute('min', 2);
                     zrange.stepDown(config.max);
                     zrange.stepUp(z);
-                    zrange.value = zvalue;
+                    zrange.value = z;
                     zinput.value = z;
+                    wrange.setAttribute('min', 2);
+                    wrange.stepDown(config.max);
+                    wrange.stepUp(w);
+                    wrange.value = w;
+                    winput.value = w;
+                    drawGraph();
+                    return;
                   }
-                  winput.value = wvalue;
-                  drawGraph();
-                  return;
                 }
               }
               zvalue = 2;
             }
-            
-            zrange.setAttribute('min',2);
+
+            zrange.setAttribute('min', 2);
             zrange.stepDown(config.max);
             zrange.stepUp(zvalue);
             zrange.value = zvalue;
@@ -154,10 +157,12 @@
               yrange.removeAttribute('disabled');
               xrange.setAttribute('min', 2);
               yrange.setAttribute('min', 2);
-              yrange.stepDown(config.max);
-              console.log(yrange.value);
-              yrange.value = 2;
-              yinput.value = 2;
+              if (yrange.value===1) {
+                yrange.stepDown(config.max);
+                yrange.stepUp(2);
+                yrange.value = 2;
+                yinput.value = 2;
+              }
               var xvalue = xinput.value;
               if (xvalue * 2 > config.max) {
                 xvalue = Math.floor(config.max / 2);
